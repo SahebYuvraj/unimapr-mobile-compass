@@ -3,8 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { BottomNav } from "@/components/BottomNav";
+import { ProfileEditDialog } from "@/components/ProfileEditDialog";
+import { NotificationPreferencesDialog } from "@/components/NotificationPreferencesDialog";
 import { useTheme } from "@/components/theme-provider";
+import { useNavigate } from "react-router-dom";
 import { 
   User, 
   MapPin, 
@@ -20,8 +24,12 @@ import {
 
 const Profile = () => {
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState(true);
   const [calendarSync, setCalendarSync] = useState(true);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showNotificationPrefs, setShowNotificationPrefs] = useState(false);
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
 
   const savedLocations = [
     { name: "Library - Study Room 204", type: "Study Space" },
@@ -53,7 +61,12 @@ const Profile = () => {
               <p className="text-muted-foreground">Computer Science • Junior</p>
               <p className="text-sm text-muted-foreground">john.doe@university.edu</p>
             </div>
-            <Button variant="outline" size="sm" className="glass">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="glass"
+              onClick={() => setShowEditProfile(true)}
+            >
               <User className="w-4 h-4 mr-2" />
               Edit
             </Button>
@@ -147,20 +160,74 @@ const Profile = () => {
         {/* Account Actions */}
         <Card className="glass-card">
           <div className="p-4 space-y-3">
-            <Button variant="ghost" className="w-full justify-start text-foreground">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-foreground"
+              onClick={() => setShowEditProfile(true)}
+            >
               <Settings className="w-4 h-4 mr-3" />
               Account Settings
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-foreground">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-foreground"
+              onClick={() => setShowNotificationPrefs(true)}
+            >
               <Bell className="w-4 h-4 mr-3" />
               Notification Preferences
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-destructive">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-destructive"
+              onClick={() => setShowSignOutDialog(true)}
+            >
               <LogOut className="w-4 h-4 mr-3" />
               Sign Out
             </Button>
           </div>
         </Card>
+
+        {/* Dialogs */}
+        <ProfileEditDialog 
+          isOpen={showEditProfile} 
+          onClose={() => setShowEditProfile(false)} 
+        />
+        
+        <NotificationPreferencesDialog 
+          isOpen={showNotificationPrefs} 
+          onClose={() => setShowNotificationPrefs(false)} 
+        />
+
+        {/* Sign Out Confirmation */}
+        <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+          <DialogContent className="glass-card">
+            <DialogHeader>
+              <DialogTitle>Sign Out</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to sign out? You'll need to log back in to access your account.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowSignOutDialog(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => {
+                  setShowSignOutDialog(false);
+                  navigate("/");
+                }}
+                className="flex-1"
+              >
+                Sign Out
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <BottomNav />

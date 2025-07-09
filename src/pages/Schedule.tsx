@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BottomNav } from "@/components/BottomNav";
 import { BottomSheet } from "@/components/BottomSheet";
-import { Plus, MapPin, Clock, User } from "lucide-react";
+import { Plus, MapPin, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
 
 const Schedule = () => {
   const [selectedClass, setSelectedClass] = useState<any>(null);
@@ -70,9 +70,31 @@ const Schedule = () => {
       {/* Header */}
       <div className="p-6 border-b border-border/50">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
-            <p className="text-muted-foreground">Week of March 4-8, 2024</p>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setCurrentWeek(currentWeek - 1)}
+              className="glass"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
+              <p className="text-muted-foreground">
+                Week of {currentWeek === 0 ? "March 4-8, 2024" : 
+                         currentWeek > 0 ? `March ${4 + (currentWeek * 7)}-${8 + (currentWeek * 7)}, 2024` :
+                         `Feb ${25 + (currentWeek * 7)}-${29 + (currentWeek * 7)}, 2024`}
+              </p>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => setCurrentWeek(currentWeek + 1)}
+              className="glass"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
           <Button size="icon" variant="outline" className="glass">
             <Plus className="w-4 h-4" />

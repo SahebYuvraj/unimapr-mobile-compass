@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -10,11 +11,27 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [uniEmail, setUniEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulate auth success
+    navigate("/onboarding");
+  };
+
+  const handleUniversityLogin = () => {
+    if (!uniEmail) {
+      setEmailError("Please enter your university email");
+      return;
+    }
+    if (!uniEmail.endsWith("@anu.edu.au")) {
+      setEmailError("Please use your ANU email address ending with @anu.edu.au");
+      return;
+    }
+    setEmailError("");
+    // Simulate university auth success
     navigate("/onboarding");
   };
 
@@ -72,9 +89,40 @@ const Auth = () => {
               </div>
             </div>
             
-            <Button variant="outline" className="w-full glass smooth-transition">
-              Continue with University Account
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full glass smooth-transition">
+                  Continue with University Account
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass-card">
+                <DialogHeader>
+                  <DialogTitle>University Login</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="uni-email">University Email</Label>
+                    <Input
+                      id="uni-email"
+                      type="email"
+                      placeholder="your.name@anu.edu.au"
+                      value={uniEmail}
+                      onChange={(e) => {
+                        setUniEmail(e.target.value);
+                        setEmailError("");
+                      }}
+                      className="glass"
+                    />
+                    {emailError && (
+                      <p className="text-destructive text-sm">{emailError}</p>
+                    )}
+                  </div>
+                  <Button onClick={handleUniversityLogin} className="w-full">
+                    Continue
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="mt-4 text-center">
