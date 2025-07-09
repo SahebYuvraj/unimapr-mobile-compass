@@ -31,8 +31,13 @@ const Auth = () => {
       return;
     }
     setEmailError("");
-    // Simulate university auth success
-    navigate("/onboarding");
+    // Send magic link to university email
+    alert(`Magic link sent to ${uniEmail}! Check your email to continue.`);
+    // In a real app, this would send an actual magic link and verify it before navigating
+    // For demo purposes, we'll navigate after the alert
+    setTimeout(() => {
+      navigate("/onboarding");
+    }, 2000);
   };
 
   return (

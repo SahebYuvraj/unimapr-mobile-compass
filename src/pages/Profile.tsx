@@ -61,15 +61,6 @@ const Profile = () => {
               <p className="text-muted-foreground">Computer Science • Junior</p>
               <p className="text-sm text-muted-foreground">john.doe@university.edu</p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="glass"
-              onClick={() => setShowEditProfile(true)}
-            >
-              <User className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
           </div>
         </Card>
 

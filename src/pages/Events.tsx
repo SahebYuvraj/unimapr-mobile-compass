@@ -89,14 +89,9 @@ const Events = () => {
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Events</h1>
-            <p className="text-muted-foreground">Discover what's happening on campus</p>
-          </div>
-          <Button size="icon" variant="outline" className="glass">
-            <Filter className="w-4 h-4" />
-          </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Events</h1>
+          <p className="text-muted-foreground">Discover what's happening on campus</p>
         </div>
 
         {/* Search */}

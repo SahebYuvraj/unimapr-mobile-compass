@@ -70,31 +70,8 @@ const Schedule = () => {
       {/* Header */}
       <div className="p-6 border-b border-border/50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setCurrentWeek(currentWeek - 1)}
-              className="glass"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
-              <p className="text-muted-foreground">
-                Week of {currentWeek === 0 ? "March 4-8, 2024" : 
-                         currentWeek > 0 ? `March ${4 + (currentWeek * 7)}-${8 + (currentWeek * 7)}, 2024` :
-                         `Feb ${25 + (currentWeek * 7)}-${29 + (currentWeek * 7)}, 2024`}
-              </p>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setCurrentWeek(currentWeek + 1)}
-              className="glass"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
           </div>
           <Button size="icon" variant="outline" className="glass">
             <Plus className="w-4 h-4" />
@@ -110,11 +87,38 @@ const Schedule = () => {
               {/* Header Row */}
               <div className="grid grid-cols-6 gap-0 border-b border-border/20">
                 <div className="p-3 text-sm font-medium text-muted-foreground">Time</div>
-                {daysOfWeek.map((day, index) => (
-                  <div key={index} className="p-3 text-sm font-medium text-center text-foreground border-l border-border/20">
-                    {day}
+                <div className="col-span-5 flex items-center justify-between p-3 border-l border-border/20">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setCurrentWeek(currentWeek - 1)}
+                    className="h-6 w-6"
+                  >
+                    <ChevronLeft className="w-3 h-3" />
+                  </Button>
+                  <div className="flex gap-4">
+                    {daysOfWeek.map((day, index) => (
+                      <div key={index} className="text-sm font-medium text-center text-foreground flex-1 min-w-16">
+                        {day}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setCurrentWeek(currentWeek + 1)}
+                    className="h-6 w-6"
+                  >
+                    <ChevronRight className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Week Display */}
+              <div className="p-2 text-center text-xs text-muted-foreground border-b border-border/10">
+                Week of {currentWeek === 0 ? "March 4-8, 2024" : 
+                         currentWeek > 0 ? `March ${4 + (currentWeek * 7)}-${8 + (currentWeek * 7)}, 2024` :
+                         `Feb ${25 + (currentWeek * 7)}-${29 + (currentWeek * 7)}, 2024`}
               </div>
 
               {/* Time Slots */}
