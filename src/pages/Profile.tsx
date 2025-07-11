@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,9 @@ import { ProfileEditDialog } from "@/components/ProfileEditDialog";
 import { NotificationPreferencesDialog } from "@/components/NotificationPreferencesDialog";
 import { useTheme } from "@/components/theme-provider";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   User, 
   MapPin, 
@@ -25,11 +28,61 @@ import {
 const Profile = () => {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [notifications, setNotifications] = useState(true);
   const [calendarSync, setCalendarSync] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showNotificationPrefs, setShowNotificationPrefs] = useState(false);
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setProfile(data);
+      }
+    };
+    fetchProfile();
+  }, [user]);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+    setShowSignOutDialog(false);
+  };
+
+  const getUserInitials = () => {
+    if (profile?.full_name) {
+      return profile.full_name
+        .split(' ')
+        .map((name: string) => name[0])
+        .join('')
+        .toUpperCase();
+    }
+    return user?.email?.[0]?.toUpperCase() || 'U';
+  };
+
+  const getUserDisplayName = () => {
+    return profile?.full_name || user?.email?.split('@')[0] || 'User';
+  };
 
   const savedLocations = [
     { name: "Library - Study Room 204", type: "Study Space" },
@@ -53,13 +106,15 @@ const Profile = () => {
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16">
               <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-                JD
+                {getUserInitials()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-foreground">John Doe</h2>
-              <p className="text-muted-foreground">Computer Science • Junior</p>
-              <p className="text-sm text-muted-foreground">john.doe@university.edu</p>
+              <h2 className="text-xl font-semibold text-foreground">{getUserDisplayName()}</h2>
+              <p className="text-muted-foreground">
+                {profile?.is_university_user ? "University Student" : "Student"}
+              </p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
         </Card>
@@ -208,10 +263,7 @@ const Profile = () => {
               </Button>
               <Button 
                 variant="destructive"
-                onClick={() => {
-                  setShowSignOutDialog(false);
-                  navigate("/");
-                }}
+                onClick={handleSignOut}
                 className="flex-1"
               >
                 Sign Out

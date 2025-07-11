@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import logo from "@/assets/logo.png";
 
 const Auth = () => {
@@ -13,15 +15,85 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [uniEmail, setUniEmail] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
+    };
+    checkSession();
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate auth success
-    navigate("/onboarding");
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          toast({
+            title: "Login Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Welcome back!",
+          description: "You have been logged in successfully.",
+        });
+        navigate("/dashboard");
+      } else {
+        // Sign up
+        const redirectUrl = `${window.location.origin}/dashboard`;
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: redirectUrl,
+          },
+        });
+
+        if (error) {
+          toast({
+            title: "Sign Up Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Check your email",
+          description: "We sent you a confirmation link to complete your registration.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUniversityLogin = () => {
+  const handleUniversityLogin = async () => {
     if (!uniEmail) {
       setEmailError("Please enter your university email");
       return;
@@ -30,14 +102,43 @@ const Auth = () => {
       setEmailError("Please use your ANU email address ending with @anu.edu.au");
       return;
     }
+    
     setEmailError("");
-    // Send magic link to university email
-    alert(`Magic link sent to ${uniEmail}! Check your email to continue.`);
-    // In a real app, this would send an actual magic link and verify it before navigating
-    // For demo purposes, we'll navigate after the alert
-    setTimeout(() => {
-      navigate("/onboarding");
-    }, 2000);
+    setLoading(true);
+
+    try {
+      const redirectUrl = `${window.location.origin}/dashboard`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email: uniEmail,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (error) {
+        toast({
+          title: "Magic Link Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Magic link sent!",
+        description: `Check your email at ${uniEmail} for the login link.`,
+      });
+      setDialogOpen(false);
+      setUniEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send magic link",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,8 +180,8 @@ const Auth = () => {
                 className="glass"
               />
             </div>
-            <Button type="submit" className="w-full smooth-transition">
-              {isLogin ? "Continue" : "Sign Up"}
+            <Button type="submit" disabled={loading} className="w-full smooth-transition">
+              {loading ? "Loading..." : (isLogin ? "Continue" : "Sign Up")}
             </Button>
           </form>
 
